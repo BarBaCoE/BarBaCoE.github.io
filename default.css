@@ -1,0 +1,25 @@
+:root,
+[data-theme="light"] {
+    --page-bg-color: white;
+    --text-color: black;
+}
+
+[data-theme="dark"] {
+    --page-bg-color: black;
+    --text-color: white;
+}
+
+body {
+    background-image: url("images/barbacoe_logo.svg");
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    background-size: contain;
+    background-color: var(--page-bg-color);
+    color: var(--text-color);
+    text-shadow:
+        -1px -1px 0 var(--page-bg-color),
+        1px -1px 0 var(--page-bg-color),
+        -1px 1px 0 var(--page-bg-color),
+        1px 1px 0 var(--page-bg-color);
+}
