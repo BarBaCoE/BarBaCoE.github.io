@@ -57,6 +57,15 @@ requirement is double-click `file://` support, both JS files are plain scripts:
 - On reset/replay, any pending `setTimeout`s from the previous run are cleared and all beers are reset to full before re-staging.
 - `attachDrainAnimation(svg, duration, { autoplay: false })` skips the immediate play so the scheduler in `app.js` can stage all beers consistently. `resetToFull(svg, duration)` resets the clip rect without playing.
 
+## Per-contestant dialog
+
+- Clicking any rank-item (or pressing Enter/Space when focused) opens a `<dialog>` with that person's **best time per category**.
+- Best time = minimum `timeSeconds` for that `(name, category)` pair across all results.
+- For categories where the person has no entry, the beer(s) render **fully filled** with no animation attached — the visual cue for "did not compete".
+- Categories with multiple beers (e.g. Meter) play sequentially using the same scheduler logic as the panel view.
+- Animations are staged inside `requestAnimationFrame` after `showModal()` so layout is complete and `getBBox()` returns real values.
+- The parsed data is cached on a module-scoped `DATA` variable so the dialog can query it without re-parsing the inlined JSON.
+
 ## Conventional commits used
 
 - `chore:` — repo/tooling

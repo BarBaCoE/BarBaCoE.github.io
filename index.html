@@ -27,6 +27,15 @@
     <small>Drink responsibly. Animate irresponsibly.</small>
   </footer>
 
+  <!-- Per-contestant best-efforts modal. Populated on demand. -->
+  <dialog id="contestant-dialog" class="contestant-dialog" aria-labelledby="contestant-dialog-title">
+    <form method="dialog" class="dialog-header">
+      <h2 id="contestant-dialog-title"></h2>
+      <button class="dialog-close" type="submit" aria-label="Close">×</button>
+    </form>
+    <div id="contestant-dialog-body" class="dialog-body"></div>
+  </dialog>
+
   <!-- Inlined data: edit this block to add/remove contestants. -->
   <script type="application/json" id="results-data">
   {

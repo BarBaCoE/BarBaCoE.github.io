@@ -225,6 +225,60 @@ main {
   border-top: 1px solid var(--border);
 }
 
+/* ===== Contestant dialog ===== */
+.contestant-dialog {
+  border: none;
+  border-radius: var(--radius);
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  max-width: min(560px, 92vw);
+  width: 100%;
+}
+.contestant-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(2px);
+}
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  margin: 0;
+}
+.dialog-header h2 { margin: 0; font-size: 1.3rem; font-style: italic; }
+.dialog-close {
+  background: transparent;
+  border: none;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-sm);
+}
+.dialog-close:hover { background: var(--surface-2); color: var(--text); }
+.dialog-body { padding: 1rem 1.25rem 1.25rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.contestant-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+}
+.contestant-row .cat-label { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.contestant-row .cat-name { font-weight: 600; }
+.contestant-row .cat-time { color: var(--text-muted); font-variant-numeric: tabular-nums; font-size: 0.9rem; }
+.contestant-row .cat-time.dnf { font-style: italic; }
+
+/* Make rank items look clickable. */
+.rank-item { cursor: pointer; transition: transform 0.1s ease, box-shadow 0.2s ease; }
+.rank-item:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(180, 80, 130, 0.18); }
+
 /* ===== Responsive ===== */
 @media (max-width: 540px) {
   .rank-item { flex-wrap: wrap; }

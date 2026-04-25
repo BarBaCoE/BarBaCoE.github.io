@@ -2,6 +2,9 @@
 // Animation API comes from window.BarbacoeAnim (loaded before this script).
 const { attachDrainAnimation, resetAndPlay, resetToFull } = window.BarbacoeAnim;
 
+// Cache the parsed data globally so the contestant dialog can query it.
+let DATA = null;
+
 // ===== Theme =====
 const THEME_KEY = "barbacoe-theme";
 
@@ -136,6 +139,14 @@ function buildPanel(category, results) {
     li.appendChild(badge);
     li.appendChild(info);
     li.appendChild(logoWrap);
+    li.dataset.name = r.name;
+    li.tabIndex = 0;
+    li.setAttribute("role", "button");
+    li.setAttribute("aria-label", `Show ${r.name}'s best efforts`);
+    li.addEventListener("click", () => openContestantDialog(r.name));
+    li.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); openContestantDialog(r.name); }
+    });
     list.appendChild(li);
   }
 
@@ -207,11 +218,88 @@ function playPanelAnimations(panel) {
   });
 }
 
+// ===== Contestant dialog =====
+function bestTimesByName(name) {
+  // Returns { categoryId: bestTimeSeconds | null } across all categories.
+  const out = {};
+  for (const cat of DATA.categories) out[cat.id] = null;
+  for (const r of DATA.results) {
+    if (r.name !== name) continue;
+    const cur = out[r.category];
+    if (cur === null || r.timeSeconds < cur) out[r.category] = r.timeSeconds;
+  }
+  return out;
+}
+
+function openContestantDialog(name) {
+  const dialog = document.getElementById("contestant-dialog");
+  if (!dialog) return;
+  document.getElementById("contestant-dialog-title").textContent = `${name} — best efforts`;
+
+  const body = document.getElementById("contestant-dialog-body");
+  body.innerHTML = "";
+  const bests = bestTimesByName(name);
+
+  // Track per-row playback context so we can stage the animations after show.
+  const rowsToAnimate = [];
+
+  for (const cat of DATA.categories) {
+    const beerCount = Number.isInteger(cat.beerCount) && cat.beerCount > 0 ? cat.beerCount : 1;
+    const best = bests[cat.id];
+
+    const row = document.createElement("div");
+    row.className = "contestant-row";
+
+    const labelWrap = document.createElement("div");
+    labelWrap.className = "cat-label";
+    const catName = document.createElement("span");
+    catName.className = "cat-name";
+    catName.textContent = `${cat.label} (${cat.volume})`;
+    const catTime = document.createElement("span");
+    catTime.className = "cat-time" + (best === null ? " dnf" : "");
+    catTime.textContent = best === null ? "did not compete" : `best: ${formatTime(best)}`;
+    labelWrap.appendChild(catName);
+    labelWrap.appendChild(catTime);
+
+    const logoWrap = document.createElement("div");
+    logoWrap.className = "rank-logo" + (beerCount > 1 ? " multi" : "");
+    for (let i = 0; i < beerCount; i++) logoWrap.appendChild(cloneLogoSvg());
+
+    row.appendChild(labelWrap);
+    row.appendChild(logoWrap);
+    body.appendChild(row);
+
+    rowsToAnimate.push({ logoWrap, beerCount, totalDuration: best });
+  }
+
+  // Show the dialog first so the SVGs are laid out (getBBox needs that).
+  if (typeof dialog.showModal === "function") dialog.showModal();
+  else dialog.setAttribute("open", "");
+
+  // Now stage animations. Categories without a time stay full (no attach).
+  // We use a microtask/rAF to ensure layout is done.
+  requestAnimationFrame(() => {
+    for (const { logoWrap, beerCount, totalDuration } of rowsToAnimate) {
+      if (totalDuration === null) continue; // Stay full — no animation.
+      const svgs = Array.from(logoWrap.querySelectorAll("svg"));
+      const perBeer = totalDuration / beerCount;
+      svgs.forEach((svg) => attachDrainAnimation(svg, perBeer, { autoplay: false }));
+      svgs.forEach((svg) => resetToFull(svg, perBeer));
+      svgs.forEach((svg, i) => {
+        const delayMs = i * perBeer * 1000;
+        if (delayMs === 0) resetAndPlay(svg, perBeer);
+        else setTimeout(() => resetAndPlay(svg, perBeer), delayMs);
+      });
+    }
+  });
+}
+
 // ===== Init =====
 document.addEventListener("DOMContentLoaded", () => {
   initThemeToggle();
 
   const data = loadData();
+  DATA = data;
   buildTabs(data.categories);
 
   const panelsEl = document.getElementById("panels");
