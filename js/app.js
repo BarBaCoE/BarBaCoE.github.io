@@ -55,8 +55,9 @@ function rankResults(results) {
 // ===== SVG cloning =====
 let svgInstanceCounter = 0;
 
-function cloneLogoSvg() {
-  const tpl = document.getElementById("logo-template");
+function cloneLogoSvg(iconId) {
+  const tplId = iconId === "pitcher" ? "logo-template-pitcher" : "logo-template";
+  const tpl = document.getElementById(tplId) || document.getElementById("logo-template");
   // Find the <svg> inside the template content.
   const original = tpl.content.querySelector("svg");
   const clone = original.cloneNode(true);
@@ -130,7 +131,7 @@ function buildPanel(category, results) {
     const logoWrap = document.createElement("div");
     logoWrap.className = "rank-logo" + (beerCount > 1 ? " multi" : "");
     for (let i = 0; i < beerCount; i++) {
-      logoWrap.appendChild(cloneLogoSvg());
+      logoWrap.appendChild(cloneLogoSvg(category.icon));
     }
     // Stash total drinking time and beer count for the animation scheduler.
     logoWrap.dataset.duration = String(r.timeSeconds);
@@ -263,7 +264,7 @@ function openContestantDialog(name) {
 
     const logoWrap = document.createElement("div");
     logoWrap.className = "rank-logo" + (beerCount > 1 ? " multi" : "");
-    for (let i = 0; i < beerCount; i++) logoWrap.appendChild(cloneLogoSvg());
+    for (let i = 0; i < beerCount; i++) logoWrap.appendChild(cloneLogoSvg(cat.icon));
 
     row.appendChild(labelWrap);
     row.appendChild(logoWrap);

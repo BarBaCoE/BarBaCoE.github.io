@@ -73,6 +73,13 @@ requirement is double-click `file://` support, both JS files are plain scripts:
 - Validates: category exists, time is a positive number, name is non-empty, and the post-edit JSON still parses before writing.
 - Falls back to a full re-serialise if the regex-based insertion can't find the array's closing bracket (e.g. someone manually reformatted the block).
 
+## Per-category icons
+
+- Categories may declare `"icon": "pitcher"` to use a different SVG (default = the original character logo).
+- Each icon variant is inlined as its own `<template id="logo-template-...">` in `index.html`.
+- `cloneLogoSvg(iconId)` picks the right template and falls back to the default if an unknown id is requested.
+- The pitcher icon (`assets/barbacoe_pitcher.svg`) keeps the same `.st0`/`.st1`/`.st2` class scheme, so the existing drain animation (clip on `.st1`) and white-backing logic both work without changes.
+
 ## Conventional commits used
 
 - `chore:` — repo/tooling
