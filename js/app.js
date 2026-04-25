@@ -1,4 +1,6 @@
-import { attachDrainAnimation, resetAndPlay } from "./animation.js";
+// Plain (non-module) script so the page works when opened via file://.
+// Animation API comes from window.BarbacoeAnim (loaded before this script).
+const { attachDrainAnimation, resetAndPlay } = window.BarbacoeAnim;
 
 // ===== Theme =====
 const THEME_KEY = "barbacoe-theme";

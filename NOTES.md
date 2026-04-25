@@ -38,6 +38,15 @@ Decisions and gotchas discovered during implementation. Keep this updated as we 
 - CSS custom properties on `:root`; dark mode flips via `:root[data-theme="dark"]`.
 - Theme persisted in `localStorage` under key `barbacoe-theme`. First visit respects `prefers-color-scheme`.
 
+## Why no ES modules
+
+Browsers block `<script type="module">` from `file://` URLs (CORS). Since the
+requirement is double-click `file://` support, both JS files are plain scripts:
+
+- `js/animation.js` runs in an IIFE and exposes `window.BarbacoeAnim`.
+- `js/app.js` reads from `window.BarbacoeAnim`.
+- They are loaded in order in `index.html` (animation first, then app).
+
 ## Conventional commits used
 
 - `chore:` — repo/tooling

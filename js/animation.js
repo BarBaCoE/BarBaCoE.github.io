@@ -2,7 +2,10 @@
 // shrinks from the top, simulating beer being drunk.
 // Uses requestAnimationFrame for maximum cross-browser compat (animating SVG
 // `y`/`height` attributes via WAAPI is inconsistent across browsers).
-
+//
+// Plain (non-module) script so the page works when opened via file://.
+// Exposes functions on `window.BarbacoeAnim`.
+(function () {
 let clipIdCounter = 0;
 
 // WeakMap<SVGElement, AnimationState>
@@ -18,7 +21,7 @@ const stateMap = new WeakMap();
  * @param {SVGSVGElement} svg
  * @param {number} durationSeconds
  */
-export function attachDrainAnimation(svg, durationSeconds) {
+function attachDrainAnimation(svg, durationSeconds) {
   const pinkEls = Array.from(svg.querySelectorAll(".st1"));
   if (pinkEls.length === 0) return;
 
@@ -109,7 +112,7 @@ function playDrain(svg) {
  * @param {SVGSVGElement} svg
  * @param {number} [durationSeconds] optional new duration
  */
-export function resetAndPlay(svg, durationSeconds) {
+function resetAndPlay(svg, durationSeconds) {
   const state = stateMap.get(svg);
   if (!state) return;
   if (typeof durationSeconds === "number" && isFinite(durationSeconds)) {
@@ -117,3 +120,6 @@ export function resetAndPlay(svg, durationSeconds) {
   }
   playDrain(svg);
 }
+
+window.BarbacoeAnim = { attachDrainAnimation, resetAndPlay };
+})();
