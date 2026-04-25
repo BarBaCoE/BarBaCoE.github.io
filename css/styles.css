@@ -74,7 +74,9 @@ main {
   letter-spacing: 0.5px;
 }
 .brand-logo {
-  font-size: 1.6rem;
+  display: block;
+  height: 2.2rem;
+  width: auto;
 }
 
 .theme-toggle {
