@@ -40,6 +40,18 @@ function attachDrainAnimation(svg, durationSeconds) {
 
   const bbox = { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
 
+  // Insert a white-filled duplicate of each pink element *behind* the original
+  // (no clip-path applied). As the pink drains, this backing shows through so
+  // the empty area looks like an empty glass instead of the page background.
+  for (const el of pinkEls) {
+    const backing = el.cloneNode(true);
+    backing.removeAttribute("class");
+    backing.removeAttribute("clip-path");
+    backing.setAttribute("fill", "#ffffff");
+    backing.setAttribute("stroke", "none");
+    el.parentNode.insertBefore(backing, el);
+  }
+
   const clipId = `beer-clip-${++clipIdCounter}`;
   const SVG_NS = "http://www.w3.org/2000/svg";
 

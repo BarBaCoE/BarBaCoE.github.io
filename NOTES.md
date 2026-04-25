@@ -26,6 +26,7 @@ Decisions and gotchas discovered during implementation. Keep this updated as we 
 - End state: pink fully drained, outline remains visible.
 - Reset: cancel rAF loops in active panel, restore rect to full size, kick off a new run.
 - **Lazy attach**: hidden panels (`display:none`) return zeros from `getBBox()`, so we only attach the animation the first time a panel becomes active. Subsequent plays just reset the existing clip rect.
+- **White backing**: for each `.st1` element we insert a white-filled clone of it directly behind the original (same shape, no clip-path). As the pink drains, the backing shows through so the emptied area looks like an empty glass instead of the page background.
 
 ## Data
 
