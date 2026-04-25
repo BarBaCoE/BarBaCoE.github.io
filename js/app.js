@@ -31,8 +31,12 @@ function initThemeToggle() {
 
 // ===== Data =====
 function loadData() {
-  const raw = document.getElementById("results-data").textContent;
-  return JSON.parse(raw);
+  const d = window.BarbacoeData;
+  if (!d) {
+    throw new Error("BarbacoeData not found. Are the data scripts in index.html loaded?");
+  }
+  // Return a shallow copy so callers can mutate freely.
+  return { categories: d.categories.slice(), results: d.results.slice() };
 }
 
 function rankResults(results) {

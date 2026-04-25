@@ -36,34 +36,6 @@
     <div id="contestant-dialog-body" class="dialog-body"></div>
   </dialog>
 
-  <!-- Inlined data: edit this block to add/remove contestants. -->
-  <script type="application/json" id="results-data">
-  {
-    "categories": [
-      { "id": "small",  "label": "Small",  "volume": "0.25 L" },
-      { "id": "medium", "label": "Medium", "volume": "0.50 L" },
-      { "id": "large",  "label": "Large",  "volume": "1.00 L" },
-      { "id": "meter",  "label": "Meter",  "volume": "11 × 0.25 L", "beerCount": 11 }
-    ],
-    "results": [
-      { "category": "small",  "name": "Alice",   "timeSeconds": 3.8 },
-      { "category": "small",  "name": "Bob",     "timeSeconds": 5.2 },
-      { "category": "small",  "name": "Charlie", "timeSeconds": 4.1 },
-      { "category": "small",  "name": "Dana",    "timeSeconds": 6.5 },
-
-      { "category": "medium", "name": "Alice",   "timeSeconds": 7.1 },
-      { "category": "medium", "name": "Bob",     "timeSeconds": 9.4 },
-      { "category": "medium", "name": "Eve",     "timeSeconds": 8.0 },
-
-      { "category": "large",  "name": "Bob",     "timeSeconds": 14.8 },
-      { "category": "large",  "name": "Frank",   "timeSeconds": 12.6 },
-      { "category": "large",  "name": "Grace",   "timeSeconds": 18.2 },
-
-      { "category": "meter",  "name": "Frank",   "timeSeconds": 42.0 },
-      { "category": "meter",  "name": "Henry",   "timeSeconds": 38.5 }
-    ]
-  }
-  </script>
 
   <!-- Inlined SVG logo template. Cloned per contestant for the drain animation. -->
   <template id="logo-template">
@@ -333,6 +305,15 @@
 </g>
 </svg>
   </template>
+
+  <!-- BARBACOE-DATA-SCRIPTS:START (managed by tools/, do not edit by hand) -->
+  <script src="data/bootstrap.js"></script>
+  <script src="data/categories.js"></script>
+  <script src="data/results/small.js"></script>
+  <script src="data/results/medium.js"></script>
+  <script src="data/results/large.js"></script>
+  <script src="data/results/meter.js"></script>
+  <!-- BARBACOE-DATA-SCRIPTS:END -->
 
   <script src="js/animation.js"></script>
   <script src="js/app.js"></script>
