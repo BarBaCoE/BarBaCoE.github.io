@@ -191,10 +191,29 @@ main {
   height: 96px;
   flex-shrink: 0;
 }
-.rank-item.top-1 .rank-logo,
-.rank-item.top-2 .rank-logo,
-.rank-item.top-3 .rank-logo { width: 120px; height: 120px; }
+.rank-item.top-1 .rank-logo:not(.multi),
+.rank-item.top-2 .rank-logo:not(.multi),
+.rank-item.top-3 .rank-logo:not(.multi) { width: 120px; height: 120px; }
 .rank-logo svg { width: 100%; height: 100%; display: block; }
+
+/* Multi-beer (e.g. Meter): a horizontal row of small beers that drain one by one. */
+.rank-logo.multi {
+  width: auto;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.rank-logo.multi svg {
+  width: 36px;
+  height: 56px;
+}
+.rank-item.top-1 .rank-logo.multi svg,
+.rank-item.top-2 .rank-logo.multi svg,
+.rank-item.top-3 .rank-logo.multi svg {
+  width: 42px;
+  height: 64px;
+}
 
 .empty { color: var(--text-muted); font-style: italic; padding: 1rem 0; }
 
@@ -209,8 +228,15 @@ main {
 /* ===== Responsive ===== */
 @media (max-width: 540px) {
   .rank-item { flex-wrap: wrap; }
-  .rank-logo, .rank-item.top-1 .rank-logo, .rank-item.top-2 .rank-logo, .rank-item.top-3 .rank-logo {
+  .rank-logo:not(.multi),
+  .rank-item.top-1 .rank-logo:not(.multi),
+  .rank-item.top-2 .rank-logo:not(.multi),
+  .rank-item.top-3 .rank-logo:not(.multi) {
     width: 80px; height: 80px;
   }
+  .rank-logo.multi svg { width: 24px; height: 40px; }
+  .rank-item.top-1 .rank-logo.multi svg,
+  .rank-item.top-2 .rank-logo.multi svg,
+  .rank-item.top-3 .rank-logo.multi svg { width: 28px; height: 44px; }
   .brand h1 { font-size: 1.15rem; }
 }

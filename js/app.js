@@ -1,6 +1,6 @@
 // Plain (non-module) script so the page works when opened via file://.
 // Animation API comes from window.BarbacoeAnim (loaded before this script).
-const { attachDrainAnimation, resetAndPlay } = window.BarbacoeAnim;
+const { attachDrainAnimation, resetAndPlay, resetToFull } = window.BarbacoeAnim;
 
 // ===== Theme =====
 const THEME_KEY = "barbacoe-theme";
@@ -79,6 +79,7 @@ function formatTime(s) {
 }
 
 function buildPanel(category, results) {
+  const beerCount = Number.isInteger(category.beerCount) && category.beerCount > 0 ? category.beerCount : 1;
   const panel = document.createElement("section");
   panel.className = "panel";
   panel.id = `panel-${category.id}`;
@@ -124,11 +125,13 @@ function buildPanel(category, results) {
     info.querySelector(".rank-time").textContent = formatTime(r.timeSeconds);
 
     const logoWrap = document.createElement("div");
-    logoWrap.className = "rank-logo";
-    const svg = cloneLogoSvg();
-    logoWrap.appendChild(svg);
-    // Stash the duration for animation attach later.
+    logoWrap.className = "rank-logo" + (beerCount > 1 ? " multi" : "");
+    for (let i = 0; i < beerCount; i++) {
+      logoWrap.appendChild(cloneLogoSvg());
+    }
+    // Stash total drinking time and beer count for the animation scheduler.
     logoWrap.dataset.duration = String(r.timeSeconds);
+    logoWrap.dataset.beerCount = String(beerCount);
 
     li.appendChild(badge);
     li.appendChild(info);
@@ -172,15 +175,35 @@ function activateTab(categoryId) {
 
 function playPanelAnimations(panel) {
   panel.querySelectorAll(".rank-logo").forEach((wrap) => {
-    const svg = wrap.querySelector("svg");
-    const duration = parseFloat(wrap.dataset.duration);
-    if (!svg || !isFinite(duration)) return;
-    if (!wrap.dataset.attached) {
-      attachDrainAnimation(svg, duration);
-      wrap.dataset.attached = "1";
-    } else {
-      resetAndPlay(svg, duration);
+    const svgs = Array.from(wrap.querySelectorAll("svg"));
+    const totalDuration = parseFloat(wrap.dataset.duration);
+    const beerCount = parseInt(wrap.dataset.beerCount, 10) || 1;
+    if (svgs.length === 0 || !isFinite(totalDuration)) return;
+    const perBeer = totalDuration / beerCount;
+
+    // Cancel any pending sequential timers from a previous run.
+    if (wrap._pendingTimers) {
+      wrap._pendingTimers.forEach(clearTimeout);
     }
+    wrap._pendingTimers = [];
+
+    // Lazy attach on first play (hidden panels return 0 from getBBox).
+    if (!wrap.dataset.attached) {
+      svgs.forEach((svg) => attachDrainAnimation(svg, perBeer, { autoplay: false }));
+      wrap.dataset.attached = "1";
+    }
+
+    // Reset all to full immediately, then play one-by-one.
+    svgs.forEach((svg) => resetToFull(svg, perBeer));
+    svgs.forEach((svg, i) => {
+      const delayMs = i * perBeer * 1000;
+      if (delayMs === 0) {
+        resetAndPlay(svg, perBeer);
+      } else {
+        const tid = setTimeout(() => resetAndPlay(svg, perBeer), delayMs);
+        wrap._pendingTimers.push(tid);
+      }
+    });
   });
 }
 

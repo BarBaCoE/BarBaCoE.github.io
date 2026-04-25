@@ -21,7 +21,9 @@ const stateMap = new WeakMap();
  * @param {SVGSVGElement} svg
  * @param {number} durationSeconds
  */
-function attachDrainAnimation(svg, durationSeconds) {
+function attachDrainAnimation(svg, durationSeconds, options) {
+  const opts = options || {};
+  const autoplay = opts.autoplay !== false;
   const pinkEls = Array.from(svg.querySelectorAll(".st1"));
   if (pinkEls.length === 0) return;
 
@@ -84,8 +86,26 @@ function attachDrainAnimation(svg, durationSeconds) {
     rafId: null,
   });
 
-  // Initial play.
-  playDrain(svg);
+  // Initial play (unless suppressed).
+  if (autoplay) playDrain(svg);
+}
+
+/**
+ * Reset the clip rect to fully covering the pink (full glass), without playing.
+ * Useful when staging a sequential animation across multiple SVGs.
+ */
+function resetToFull(svg, durationSeconds) {
+  const state = stateMap.get(svg);
+  if (!state) return;
+  if (typeof durationSeconds === "number" && isFinite(durationSeconds)) {
+    state.durationMs = Math.max(50, durationSeconds * 1000);
+  }
+  if (state.rafId !== null) {
+    cancelAnimationFrame(state.rafId);
+    state.rafId = null;
+  }
+  state.rect.setAttribute("y", String(state.bbox.y));
+  state.rect.setAttribute("height", String(state.bbox.height));
 }
 
 function playDrain(svg) {
@@ -133,5 +153,5 @@ function resetAndPlay(svg, durationSeconds) {
   playDrain(svg);
 }
 
-window.BarbacoeAnim = { attachDrainAnimation, resetAndPlay };
+window.BarbacoeAnim = { attachDrainAnimation, resetAndPlay, resetToFull };
 })();

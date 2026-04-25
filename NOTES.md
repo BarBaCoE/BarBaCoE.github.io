@@ -49,6 +49,14 @@ requirement is double-click `file://` support, both JS files are plain scripts:
 - `js/app.js` reads from `window.BarbacoeAnim`.
 - They are loaded in order in `index.html` (animation first, then app).
 
+## Multi-beer categories (e.g. Meter)
+
+- Categories may declare `"beerCount": N` (default 1).
+- For multi-beer categories the rank-item logo wrapper gets class `multi` and contains N cloned SVGs in a horizontal flex row.
+- Per-beer duration = `timeSeconds / N`. Beers play **sequentially** (not simultaneously): a `setTimeout` schedules each beer's drain to start when the previous one finishes.
+- On reset/replay, any pending `setTimeout`s from the previous run are cleared and all beers are reset to full before re-staging.
+- `attachDrainAnimation(svg, duration, { autoplay: false })` skips the immediate play so the scheduler in `app.js` can stage all beers consistently. `resetToFull(svg, duration)` resets the clip rect without playing.
+
 ## Conventional commits used
 
 - `chore:` — repo/tooling
