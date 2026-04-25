@@ -175,7 +175,12 @@ function playPanelAnimations(panel) {
     const svg = wrap.querySelector("svg");
     const duration = parseFloat(wrap.dataset.duration);
     if (!svg || !isFinite(duration)) return;
-    resetAndPlay(svg, duration);
+    if (!wrap.dataset.attached) {
+      attachDrainAnimation(svg, duration);
+      wrap.dataset.attached = "1";
+    } else {
+      resetAndPlay(svg, duration);
+    }
   });
 }
 
@@ -196,13 +201,6 @@ document.addEventListener("DOMContentLoaded", () => {
     panelsEl.appendChild(panel);
   });
 
-  // Attach drain animation to every logo (now that they're in the DOM, getBBox works).
-  document.querySelectorAll(".rank-logo").forEach((wrap) => {
-    const svg = wrap.querySelector("svg");
-    const duration = parseFloat(wrap.dataset.duration);
-    if (svg && isFinite(duration)) attachDrainAnimation(svg, duration);
-  });
-
   // Reset buttons.
   document.querySelectorAll(".reset-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
@@ -212,6 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // Auto-play first (visible) panel on load.
+  // Attaching is lazy because hidden panels (display:none) return 0 from getBBox.
   const firstPanel = document.querySelector(".panel.active");
   if (firstPanel) playPanelAnimations(firstPanel);
 });
