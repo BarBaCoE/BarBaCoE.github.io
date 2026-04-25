@@ -25,6 +25,7 @@ Decisions and gotchas discovered during implementation. Keep this updated as we 
   6. Animate the rect with `requestAnimationFrame` (max compat — animating SVG `y`/`height` via WAAPI is spotty across browsers): from full bbox → zero-height at the bottom.
 - End state: pink fully drained, outline remains visible.
 - Reset: cancel rAF loops in active panel, restore rect to full size, kick off a new run.
+- **Lazy attach**: hidden panels (`display:none`) return zeros from `getBBox()`, so we only attach the animation the first time a panel becomes active. Subsequent plays just reset the existing clip rect.
 
 ## Data
 
