@@ -21,48 +21,39 @@ No build step, no dependencies. Two options:
 
 ## Add / edit results
 
-### Quick: use the CLI tool
+### Quick: use the CLI tools
 
 ```bash
+# Add a single result
 node tools/add-entry.js <category> <name> <timeSeconds>
-# e.g.
 node tools/add-entry.js small "Alice" 3.8
-node tools/add-entry.js meter "Henry" 38.5
 
-node tools/add-entry.js --list   # list available categories
-node tools/add-entry.js --help
+# Add many results for one contestant in one go
+node tools/add-contestant.js <name> <category>=<time> [...]
+node tools/add-contestant.js "Alice" small=3.8 medium=7.1 large=14.2
+
+# Add a new category (creates data file + wires it into index.html)
+node tools/add-category.js <id> <label> <volume> [beerCount]
+node tools/add-category.js xl "Extra Large" "1.50 L"
+node tools/add-category.js double-meter "Double Meter" "22 × 0.25 L" 22
+
+# List categories
+node tools/add-entry.js --list
 ```
 
-The tool edits `index.html` in place, validates the category and time, and
-verifies the result is still valid JSON before writing.
+All tools edit the data files in place (and `index.html` only when adding a
+category, to register the new `<script>`).
 
-### Manual: edit `index.html`
+### Manual: edit the data files
 
-Find the block:
+Data lives under `data/`:
 
-```html
-<script type="application/json" id="results-data">
-  { ... }
-</script>
-```
+- `data/categories.js` — one `BarbacoeData.addCategory({...})` per category.
+- `data/results/<id>.js` — one file per category, with a list of
+  `{ name, timeSeconds }` entries.
 
-Edit it. Each result is just:
-
-```json
-{ "category": "small", "name": "Alice", "timeSeconds": 3.8 }
-```
-
-`category` must match one of the `id`s in `categories` (`small`, `medium`,
-`large`, `meter`). `timeSeconds` is a number — the drain animation will run
-for exactly that many seconds.
-
-To add a new category, append to the `categories` array:
-
-```json
-{ "id": "shoey", "label": "Shoey", "volume": "size 9 boot" }
-```
-
-Save and reload the page. Done.
+When adding a category by hand, also add a `<script src="data/results/<id>.js">`
+inside the `<!-- BARBACOE-DATA-SCRIPTS:START/END -->` block in `index.html`.
 
 ## Features
 
@@ -77,14 +68,27 @@ Save and reload the page. Done.
 
 ```
 .
-├── index.html            # Markup + inlined data + inlined SVG template
-├── css/styles.css        # Theme variables, layout, dark mode
+├── index.html             # Markup + inlined SVG template
+├── css/styles.css         # Theme variables, layout, dark mode
 ├── js/
-│   ├── animation.js      # SVG drain animation (clipPath + rAF)
-│   └── app.js            # Tabs, rendering, theme toggle
+│   ├── animation.js       # SVG drain animation (clipPath + rAF)
+│   └── app.js             # Tabs, rendering, theme toggle, contestant dialog
+├── data/
+│   ├── bootstrap.js       # window.BarbacoeData with addCategory/addResults
+│   ├── categories.js      # category definitions
+│   └── results/
+│       ├── small.js
+│       ├── medium.js
+│       ├── large.js
+│       └── meter.js
+├── tools/
+│   ├── _common.js         # shared helpers
+│   ├── add-entry.js       # add a single result
+│   ├── add-contestant.js  # add many results for one contestant
+│   └── add-category.js    # add a new category (file + script tag)
 ├── assets/barbacoe_logo.svg
-├── PLAN.md               # Original design plan
-└── NOTES.md              # Implementation decisions / gotchas
+├── PLAN.md                # Original design plan
+└── NOTES.md               # Implementation decisions / gotchas
 ```
 
 ## Deploy
