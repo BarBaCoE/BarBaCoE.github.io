@@ -66,6 +66,13 @@ requirement is double-click `file://` support, both JS files are plain scripts:
 - Animations are staged inside `requestAnimationFrame` after `showModal()` so layout is complete and `getBBox()` returns real values.
 - The parsed data is cached on a module-scoped `DATA` variable so the dialog can query it without re-parsing the inlined JSON.
 
+## CLI tool: `tools/add-entry.js`
+
+- Plain Node.js script (uses ESM, no dependencies). Run with any modern Node.
+- Surgically edits the `<script type="application/json" id="results-data">` block in `index.html` instead of re-serialising the whole JSON, so existing formatting (one-line-per-result, comments outside the block) is preserved.
+- Validates: category exists, time is a positive number, name is non-empty, and the post-edit JSON still parses before writing.
+- Falls back to a full re-serialise if the regex-based insertion can't find the array's closing bracket (e.g. someone manually reformatted the block).
+
 ## Conventional commits used
 
 - `chore:` — repo/tooling
