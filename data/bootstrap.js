@@ -23,7 +23,12 @@
           console.error("BarbacoeData.addResults: skipping invalid entry in", categoryId, r);
           continue;
         }
-        this.results.push({ category: categoryId, name: r.name, timeSeconds: r.timeSeconds });
+        this.results.push({
+          category: categoryId,
+          name: r.name,
+          timeSeconds: r.timeSeconds,
+          date: typeof r.date === "string" ? r.date : null,
+        });
       }
     },
   };

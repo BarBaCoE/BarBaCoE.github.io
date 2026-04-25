@@ -129,7 +129,15 @@ function buildPanel(category, results) {
       <div class="rank-time"></div>
     `;
     info.querySelector(".rank-name").textContent = r.name;
-    info.querySelector(".rank-time").textContent = formatTime(r.timeSeconds);
+    const timeEl = info.querySelector(".rank-time");
+    timeEl.textContent = formatTime(r.timeSeconds);
+    if (r.date) {
+      const dateEl = document.createElement("span");
+      dateEl.className = "rank-date";
+      dateEl.textContent = r.date;
+      timeEl.appendChild(document.createTextNode(" · "));
+      timeEl.appendChild(dateEl);
+    }
 
     const logoWrap = document.createElement("div");
     logoWrap.className = "rank-logo" + (beerCount > 1 ? " multi" : "");
@@ -224,13 +232,15 @@ function playPanelAnimations(panel) {
 
 // ===== Contestant dialog =====
 function bestTimesByName(name) {
-  // Returns { categoryId: bestTimeSeconds | null } across all categories.
+  // Returns { categoryId: { timeSeconds, date } | null } across all categories.
   const out = {};
   for (const cat of DATA.categories) out[cat.id] = null;
   for (const r of DATA.results) {
     if (r.name !== name) continue;
     const cur = out[r.category];
-    if (cur === null || r.timeSeconds < cur) out[r.category] = r.timeSeconds;
+    if (cur === null || r.timeSeconds < cur.timeSeconds) {
+      out[r.category] = { timeSeconds: r.timeSeconds, date: r.date || null };
+    }
   }
   return out;
 }
@@ -261,7 +271,11 @@ function openContestantDialog(name) {
     catName.textContent = `${cat.label} (${cat.volume})`;
     const catTime = document.createElement("span");
     catTime.className = "cat-time" + (best === null ? " dnf" : "");
-    catTime.textContent = best === null ? "did not compete" : `best: ${formatTime(best)}`;
+    if (best === null) {
+      catTime.textContent = "did not compete";
+    } else {
+      catTime.textContent = `best: ${formatTime(best.timeSeconds)}` + (best.date ? ` on ${best.date}` : "");
+    }
     labelWrap.appendChild(catName);
     labelWrap.appendChild(catTime);
 
@@ -273,7 +287,7 @@ function openContestantDialog(name) {
     row.appendChild(logoWrap);
     body.appendChild(row);
 
-    rowsToAnimate.push({ logoWrap, beerCount, totalDuration: best });
+    rowsToAnimate.push({ logoWrap, beerCount, totalDuration: best === null ? null : best.timeSeconds });
   }
 
   // Show the dialog first so the SVGs are laid out (getBBox needs that).

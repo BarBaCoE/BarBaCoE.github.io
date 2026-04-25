@@ -185,6 +185,7 @@ main {
 .rank-info { flex: 1; min-width: 0; }
 .rank-name { font-size: 1.1rem; font-weight: 600; }
 .rank-time { color: var(--text-muted); font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+.rank-date { font-variant-numeric: tabular-nums; opacity: 0.85; }
 
 .rank-logo {
   width: 96px;

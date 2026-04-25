@@ -105,7 +105,7 @@ export function createResultsFile(category) {
 
 const RESULTS_TAIL_RE = /(\n)?(\s*)\]\s*\)\s*;\s*$/m;
 
-export function appendResultEntry(categoryId, name, timeSeconds) {
+export function appendResultEntry(categoryId, name, timeSeconds, date) {
   const path = resultsPath(categoryId);
   if (!existsSync(path)) {
     throw new Error(`No results file for category "${categoryId}". Add the category first.`);
@@ -116,7 +116,8 @@ export function appendResultEntry(categoryId, name, timeSeconds) {
 
   // Detect existing indent (default 2 spaces).
   const itemIndent = (text.match(/\n( +)\{ name:/) || [, "  "])[1];
-  const formatted = `{ name: ${JSON.stringify(name)}, timeSeconds: ${timeSeconds} }`;
+  const datePart = date ? `, date: ${JSON.stringify(date)}` : "";
+  const formatted = `{ name: ${JSON.stringify(name)}, timeSeconds: ${timeSeconds}${datePart} }`;
 
   // Slice up the file at the closing tail and insert before it.
   const tailStart = text.length - m[0].length;
@@ -128,4 +129,24 @@ export function appendResultEntry(categoryId, name, timeSeconds) {
   const sep = hasExisting ? "," : "";
   const next = `${before}${sep}\n${itemIndent}${formatted}${after}`;
   writeFileSync(path, next);
+}
+
+// ---- date ----
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+export function isValidDate(s) {
+  if (typeof s !== "string" || !DATE_RE.test(s)) return false;
+  const [y, m, d] = s.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  return (
+    dt.getUTCFullYear() === y &&
+    dt.getUTCMonth() === m - 1 &&
+    dt.getUTCDate() === d
+  );
+}
+export function todayIso() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }

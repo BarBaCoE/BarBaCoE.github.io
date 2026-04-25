@@ -30,8 +30,13 @@ Decisions and gotchas discovered during implementation. Keep this updated as we 
 
 ## Data
 
-- Inlined inside `index.html` as `<script type="application/json" id="results-data">` so the page works via double-click `file://`.
+- Lives under `data/`, loaded as plain (non-module) scripts so the page works on `file://`.
+- `data/bootstrap.js` defines `window.BarbacoeData` with `addCategory(cat)` and `addResults(catId, [...])`.
+- `data/categories.js` calls `addCategory(...)` once per category.
+- `data/results/<id>.js` calls `addResults(<id>, [...])` with one entry per result. One file per category.
+- `index.html` lists the data scripts inside `<!-- BARBACOE-DATA-SCRIPTS:START/END -->` markers. The CLI tools edit this block when adding/removing categories.
 - Sorted ascending by `timeSeconds` per category.
+- Ties: same rank, alphabetical by name.
 - Ties: same rank, alphabetical by name.
 
 ## Styling
@@ -66,12 +71,14 @@ requirement is double-click `file://` support, both JS files are plain scripts:
 - Animations are staged inside `requestAnimationFrame` after `showModal()` so layout is complete and `getBBox()` returns real values.
 - The parsed data is cached on a module-scoped `DATA` variable so the dialog can query it without re-parsing the inlined JSON.
 
-## CLI tool: `tools/add-entry.js`
+## CLI tools (`tools/`)
 
-- Plain Node.js script (uses ESM, no dependencies). Run with any modern Node.
-- Surgically edits the `<script type="application/json" id="results-data">` block in `index.html` instead of re-serialising the whole JSON, so existing formatting (one-line-per-result, comments outside the block) is preserved.
-- Validates: category exists, time is a positive number, name is non-empty, and the post-edit JSON still parses before writing.
-- Falls back to a full re-serialise if the regex-based insertion can't find the array's closing bracket (e.g. someone manually reformatted the block).
+- `tools/_common.js` — shared helpers (read/write categories, results files, the index.html scripts block).
+- `tools/add-entry.js <cat> <name> <time>` — append one result to `data/results/<cat>.js`.
+- `tools/add-contestant.js <name> <cat>=<time> [...]` — append several results for one person in one go.
+- `tools/add-category.js <id> <label> <volume> [beerCount]` — creates `data/results/<id>.js`, appends to `data/categories.js`, and inserts the `<script>` tag into `index.html`.
+- ESM (`tools/package.json` declares `"type": "module"`), no dependencies, no `npm install`.
+- Tools edit files as text using regex/markers (not by re-serialising) so manual formatting / comments are preserved.
 
 ## Conventional commits used
 
