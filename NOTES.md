@@ -33,7 +33,7 @@ Decisions and gotchas discovered during implementation. Keep this updated as we 
 - Lives under `data/`, loaded as plain (non-module) scripts so the page works on `file://`.
 - `data/bootstrap.js` defines `window.BarbacoeData` with `addCategory(cat)` and `addResults(catId, [...])`.
 - `data/categories.js` calls `addCategory(...)` once per category.
-- `data/results/<id>.js` calls `addResults(<id>, [...])` with one entry per result. One file per category.
+- `data/results/<id>.js` calls `addResults(<id>, [...])` with one entry per result. Each entry: `{ name, timeSeconds, date? }` where `date` is `YYYY-MM-DD` (CLI tools default it to today and validate it for calendar correctness).
 - `index.html` lists the data scripts inside `<!-- BARBACOE-DATA-SCRIPTS:START/END -->` markers. The CLI tools edit this block when adding/removing categories.
 - Sorted ascending by `timeSeconds` per category.
 - Ties: same rank, alphabetical by name.

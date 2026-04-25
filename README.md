@@ -24,13 +24,16 @@ No build step, no dependencies. Two options:
 ### Quick: use the CLI tools
 
 ```bash
-# Add a single result
-node tools/add-entry.js <category> <name> <timeSeconds>
-node tools/add-entry.js small "Alice" 3.8
+# Add a single result (date defaults to today)
+node tools/add-entry.js <category> <name> <timeSeconds> [date]
+node tools/add-entry.js small "Alice" 3.8                  # uses today
+node tools/add-entry.js small "Alice" 3.8 2026-04-25       # explicit date
+node tools/add-entry.js --date 2026-04-25 small "Alice" 3.8
 
-# Add many results for one contestant in one go
-node tools/add-contestant.js <name> <category>=<time> [...]
+# Add many results for one contestant on the same day
+node tools/add-contestant.js [--date YYYY-MM-DD] <name> <category>=<time> [...]
 node tools/add-contestant.js "Alice" small=3.8 medium=7.1 large=14.2
+node tools/add-contestant.js --date 2026-04-25 "Henry" meter=38.5
 
 # Add a new category (creates data file + wires it into index.html)
 node tools/add-category.js <id> <label> <volume> [beerCount]
@@ -41,8 +44,10 @@ node tools/add-category.js double-meter "Double Meter" "22 × 0.25 L" 22
 node tools/add-entry.js --list
 ```
 
-All tools edit the data files in place (and `index.html` only when adding a
-category, to register the new `<script>`).
+Dates are `YYYY-MM-DD` and validated for actual calendar correctness (no
+`2025-02-29`, no `2026-13-99`).
+
+### Manual: edit the data files
 
 ### Manual: edit the data files
 
