@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BELL</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            background-color: #2c3e50;
+            font-family: Arial, sans-serif;
+            overflow: hidden;
+        }
+        
+        .container {
+            text-align: center;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .photo {
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 90vmin;
+            height: 90vmin;
+            object-fit: contain;
+        }
+        
+        .photo:hover {
+            transform: scale(1.05);
+        }
+        
+        .photo:active {
+            transform: scale(0.95);
+        }
+        
+        .instruction {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ecf0f1;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            opacity: 0.8;
+        }
+        
+        .timer-display {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ecf0f1;
+            font-size: 48px;
+            font-weight: bold;
+            font-family: 'Courier New', monospace;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            background: rgba(44, 62, 80, 0.8);
+            padding: 20px 40px;
+            border-radius: 15px;
+            border: 3px solid #34495e;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .timer-status {
+            position: absolute;
+            top: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #ecf0f1;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="timer-display" id="timerDisplay">00:00.000</div>
+        <div class="timer-status" id="timerStatus">Click bell to start timer</div>
+        <img src="ships_bell_dsa.svg" alt="Ship's Bell - DSA Pattern" class="photo" id="BellPhoto">
+        <p class="instruction">Click the bell to ring it!</p>
+    </div>
+
+    <script>
+        // Create audio context for doorbell sound
+        let audioContext;
+        let bennyHillAudio = null;
+        
+        function createShipsBellSound() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            // Create an authentic ship's bell sound
+            const duration = 4.0; // Longer duration for ship's bell resonance
+            const sampleRate = audioContext.sampleRate;
+            const frameCount = sampleRate * duration;
+            const arrayBuffer = audioContext.createBuffer(1, frameCount, sampleRate);
+            const channelData = arrayBuffer.getChannelData(0);
+            
+            // Ship's bell characteristics: deep, resonant, metallic with harmonics
+            for (let i = 0; i < frameCount; i++) {
+                const t = i / sampleRate;
+                let sample = 0;
+                
+                // Fundamental frequency (deeper than a doorbell)
+                const fundamental = 200; // Much lower frequency for ship's bell
+                
+                // Create complex harmonics typical of bronze bells
+                const envelope = Math.exp(-t * 1.2) * (1 + 0.3 * Math.sin(t * 15)); // Slow decay with slight warble
+                
+                // Fundamental tone
+                sample += Math.sin(2 * Math.PI * fundamental * t) * envelope * 0.4;
+                
+                // Harmonics that give the bell its metallic character
+                sample += Math.sin(2 * Math.PI * fundamental * 2.1 * t) * envelope * 0.25; // Slightly detuned 2nd harmonic
+                sample += Math.sin(2 * Math.PI * fundamental * 3.2 * t) * envelope * 0.15; // Detuned 3rd harmonic
+                sample += Math.sin(2 * Math.PI * fundamental * 4.7 * t) * envelope * 0.08; // Higher harmonic
+                sample += Math.sin(2 * Math.PI * fundamental * 6.1 * t) * envelope * 0.05; // Metallic overtone
+                
+                // Add some noise for the metallic "clank" of the clapper hitting the bell
+                if (t < 0.05) {
+                    const clankEnvelope = Math.exp(-t * 50);
+                    const noise = (Math.random() - 0.5) * 0.3 * clankEnvelope;
+                    sample += noise;
+                }
+                
+                // Add subtle beat frequencies for authenticity
+                sample += Math.sin(2 * Math.PI * (fundamental + 3) * t) * envelope * 0.1;
+                
+                channelData[i] = sample * 0.7; // Overall volume adjustment
+            }
+            
+            return arrayBuffer;
+        }
+        
+        function playShipsBell() {
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                const source = audioContext.createBufferSource();
+                const gainNode = audioContext.createGain();
+                
+                source.buffer = createShipsBellSound();
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Set volume for ship's bell
+                gainNode.gain.value = 0.6;
+                
+                source.start();
+            } catch (error) {
+                console.error('Error playing ship\'s bell sound:', error);
+                // Fallback: create a simple beep
+                playFallbackBeep();
+            }
+        }
+        
+        function playFallbackBeep() {
+            // Simple fallback beep using oscillator
+            try {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.3);
+                
+                gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+                gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 1);
+            } catch (error) {
+                console.error('Error playing fallback beep:', error);
+            }
+        }
+        
+        // Benny Hill theme functions
+        function initializeBennyHillAudio() {
+            if (!bennyHillAudio) {
+                bennyHillAudio = new Audio('Benny-Hill-Theme-style-Royalty-free.mp3');
+                bennyHillAudio.loop = true;
+                bennyHillAudio.volume = 0.3; // Lower volume so it doesn't overpower the bell
+                
+                // Preload the audio
+                bennyHillAudio.preload = 'auto';
+            }
+        }
+        
+        function playBennyHillTheme() {
+            try {
+                initializeBennyHillAudio();
+                bennyHillAudio.currentTime = 0; // Start from beginning
+                bennyHillAudio.play();
+            } catch (error) {
+                console.error('Error playing Benny Hill theme:', error);
+            }
+        }
+        
+        function stopBennyHillTheme() {
+            if (bennyHillAudio) {
+                bennyHillAudio.pause();
+                bennyHillAudio.currentTime = 0; // Reset to beginning for next play
+            }
+        }
+        
+        // Timer variables
+        let timerStartTime = null;
+        let timerInterval = null;
+        let isTimerRunning = false;
+        
+        // Timer functions
+        function formatTime(milliseconds) {
+            const totalMs = Math.floor(milliseconds);
+            const minutes = Math.floor(totalMs / 60000);
+            const seconds = Math.floor((totalMs % 60000) / 1000);
+            const ms = totalMs % 1000;
+            
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+        }
+        
+        function startTimer() {
+            timerStartTime = Date.now();
+            isTimerRunning = true;
+            document.getElementById('timerStatus').textContent = 'Timer running... Click bell to stop';
+            
+            // Start Benny Hill theme music
+            playBennyHillTheme();
+            
+            timerInterval = setInterval(() => {
+                const elapsed = Date.now() - timerStartTime;
+                document.getElementById('timerDisplay').textContent = formatTime(elapsed);
+            }, 10); // Update every 10ms for smooth display
+        }
+        
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Stop Benny Hill theme music
+            stopBennyHillTheme();
+            
+            const finalTime = Date.now() - timerStartTime;
+            isTimerRunning = false;
+            document.getElementById('timerStatus').textContent = `Final time: ${formatTime(finalTime)} - Click bell to restart`;
+            
+            // Keep the final time displayed
+            document.getElementById('timerDisplay').textContent = formatTime(finalTime);
+        }
+        
+        function resetTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            
+            // Stop any playing music
+            stopBennyHillTheme();
+            
+            timerStartTime = null;
+            isTimerRunning = false;
+            document.getElementById('timerDisplay').textContent = '00:00.000';
+            document.getElementById('timerStatus').textContent = 'Click bell to start timer';
+        }
+        
+        // Add click event listener to the image
+        document.getElementById('BellPhoto').addEventListener('click', function() {
+            playShipsBell();
+            
+            // Add visual feedback
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+            
+            // Timer logic
+            if (!timerStartTime) {
+                // First click - start timer
+                startTimer();
+            } else if (isTimerRunning) {
+                // Second click - stop timer
+                stopTimer();
+            } else {
+                // Third+ click - reset and start new timer
+                resetTimer();
+                setTimeout(startTimer, 100); // Small delay for visual feedback
+            }
+        });
+        
+        // Initialize audio context on first user interaction (required by browsers)
+        document.addEventListener('click', function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            document.removeEventListener('click', initAudio);
+        }, { once: true });
+    </script>
+</body>
+</html>
